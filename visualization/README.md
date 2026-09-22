@@ -13,16 +13,18 @@
 
 ## 当前仍保留且可用的模块
 
-- `attention_heatmap/`
 - `ablation/`
 - `abundance/`
+- `attention_heatmap/`
 - `classification/`
+- `comparison_Acc/`
 - `feature_peaks/`
 - `gradcam/`
 - `hyperparameter_sensitivity/`
+- `performance_radar/`
+- `predicted_residuals/`
 - `prediction_kde/`
 - `prediction_scatter/`
-- `predicted_residuals/`
 - `preprocessing/`
 - `representative_spectra/`
 - `shap/`
@@ -33,6 +35,7 @@
 - `tables/`
 - `tsne/`
 - `umap/`
+- `violin/`
 
 ## 当前统一输出口径
 

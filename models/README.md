@@ -5,9 +5,10 @@
 ## 当前主线模型
 
 - `dual_head_model.py`
-  - `DualHeadRamanCNNLSTM`
+  - `DualHeadRamanCNNLSTM`(别名 `RADARNet`)
   - 当前主模型 `RADAR-Net`
   - 负责 `PP / PE` 双任务预测
+  - 文件内另有别名 `ADMIC`,为**已废弃旧名**,仅作导入兼容保留;新代码一律使用 `RADAR-Net` / `RADARNet`
 
 ## 当前最终对比模型
 
@@ -25,7 +26,15 @@
 - 旧实验兼容
 - 归档代码保留
 
-它们不再属于当前主线对比入口。
+它们不再属于当前主线对比入口。其中包括已弃用模型的实现类:
+
+- `Simple1DCNN`(旧 `1D-CNN`)
+- `SpectralTransformer1D`(旧 `1D-Transformer`)
+- `PLSDA`(旧 `PLS-DA`)
+- `RSMLPClassifier`(旧 `RS-MLP`)
+- `LITEClassifier`(旧 `LITE`)
+
+与此相对,`model_comparison_Acc.py` 只调用 `SMARTNIRClassifier`、`ConvTranClassifier`、`MambaHSIClassifier` 与 `ResNet50_1D` 四个对比模型。
 
 ## 当前推荐使用方式
 

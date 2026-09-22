@@ -52,11 +52,17 @@
 
 ## 当前已弃用模型
 
-- `RS-MLP`
-- `LITE`
-- 老对比口径中的 `1D-CNN`
-- 老对比口径中的 `1D-Transformer`
-- 老对比口径中的 `PLS-DA`
+以下模型不再参与最终对比,其在 `models/base_models.py` 中的实现仅作历史留存:
+
+| 弃用名称 | 对应实现类 | 当前状态 |
+| --- | --- | --- |
+| `RS-MLP` | `RSMLPClassifier` | 已弃用,实现仍保留 |
+| `LITE` | `LITEClassifier` | 已弃用,实现仍保留 |
+| `1D-CNN` | `Simple1DCNN` | 已弃用,由 `SMART-NIR` 替换 |
+| `1D-Transformer` | `SpectralTransformer1D` | 已弃用,由 `ConvTran` 替换 |
+| `PLS-DA` | `PLSDA` | 已弃用,由 `MambaHSI` 替换 |
+
+说明:`model_comparison_Acc.py` 当前只调用 `SMARTNIRClassifier`、`ConvTranClassifier`、`MambaHSIClassifier` 与 `ResNet50_1D` 四个对比模型本体。
 
 ## 备注
 
