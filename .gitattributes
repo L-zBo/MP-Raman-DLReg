@@ -1,0 +1,41 @@
+# 换行与二进制处理规则
+#
+# 背景：仓库原先 core.autocrlf=true 且无 .gitattributes，导致 git 把 .mic 等
+# 仪器二进制文件当文本做 CRLF 转换（2026-08 排查同步冲突时发现 18 个 .mic
+# 的 blob 与磁盘副本仅差换行）。二进制文件一旦被换行转换就是不可逆损坏。
+
+# 默认：让 git 自行判断文本/二进制，文本在仓库内一律存 LF
+* text=auto eol=lf
+
+# --- 仪器原始数据与模型权重：绝不做任何转换 ---
+*.mic   binary
+*.npy   binary
+*.npz   binary
+*.pth   binary
+*.pt    binary
+*.pkl   binary
+
+# --- 图片与文档：二进制 ---
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.pdf   binary
+*.docx  binary
+*.doc   binary
+*.xlsx  binary
+*.zip   binary
+
+# --- 原始光谱数据：仓库内存 LF，检出到工作区为 CRLF ---
+# 这些 CSV 由拉曼系统导出为 CRLF。显式声明 eol=crlf 与现状一致，
+# 既保持 HEAD 中已有的 LF 存储不变，也让 git status 不再报伪修改。
+dataset/**/*.csv text eol=crlf
+
+# --- 纯文本源码与文档：统一 LF ---
+*.py    text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.json  text eol=lf
+*.tex   text eol=lf

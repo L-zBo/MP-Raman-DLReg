@@ -1,0 +1,230 @@
+# ============================================================
+# 拉曼光谱微塑料检测系统 - 统一配置文件
+# ============================================================
+
+# 项目路径配置
+paths:
+  dataset_dir: "dataset"
+  preprocessed_dir: "preprocessed_data"
+  output_dir: "output"
+  models_dir: "output/models"
+
+# 数据集配置
+dataset:
+  # 多数据集联合训练配置
+  datasets:
+    - type: "PP+淀粉"
+      label: "PP"
+      samples:
+        - name: "pp_mixed1"
+          folder: "PP+淀粉/1 785mw 2s 2 2 40 40"
+        - name: "pp_mixed2"
+          folder: "PP+淀粉/2 785mw 2s 2 2 40 40"
+        - name: "pp_mixed3"
+          folder: "PP+淀粉/3 785mw 2s 2 2 40 40"
+        - name: "pp_mixed4"
+          folder: "PP+淀粉/4 785mw 2s 2 2 40 40"
+        - name: "pp_mixed5"
+          folder: "PP+淀粉/5 785mw 2s 2 2 40 40"
+    - type: "PE+淀粉"
+      label: "PE"
+      samples:
+        - name: "pe_mixed1"
+          folder: "PE+淀粉/1 785mw 2s 2 2 40 40"
+        - name: "pe_mixed2"
+          folder: "PE+淀粉/2 785mw 2s 1 1 40 40"
+        - name: "pe_mixed3"
+          folder: "PE+淀粉/3 785mw 2s 0.7 0.7 40 40"
+        - name: "pe_mixed4"
+          folder: "PE+淀粉/4 785mw 2s 2 2 40 40"
+        - name: "pe_mixed5"
+          folder: "PE+淀粉/5 785mw 2s 2 2 40 40"
+  # 端元配置（三端元：淀粉、PP、PE）
+  endmembers:
+    starch:
+      folder: "淀粉纯谱/玉米淀粉"
+      file: "DATA-105635-X0-Y30-8884.csv"
+    pp:
+      folder: "PP纯谱"
+      file: "采集图谱.csv"
+    pe:
+      folder: "PE纯谱"
+      file: "采集图谱.csv"
+  # 光谱参数
+  n_bands: 1024
+  spatial_size: [40, 40]
+  encoding: "gbk"
+
+# 预处理参数 (ALS基线校正)
+preprocessing:
+  als:
+    lambda: 1.0e+5      # 平滑度参数
+    p: 0.01             # 非对称权重
+    n_iterations: 10    # 迭代次数
+  # 并行处理
+  n_jobs: -1            # -1表示使用所有CPU核心
+  batch_size: 100       # 批处理大小
+
+# 解混参数
+unmixing:
+  method: "nnls"        # 非负最小二乘
+  n_jobs: -1            # 并行核心数
+  normalize: true       # 是否归一化丰度
+
+# 分类参数
+classification:
+  method: "abundance_threshold"
+  n_classes: 3
+  random_state: 42
+  class_names:
+    - "无污染"
+    - "低污染"
+    - "高污染"
+
+# 模型配置
+model:
+  architecture:
+    input_len: 1024
+    num_classes: 3
+    conv_channels: [32, 64]
+    kernel_sizes: [7, 5]
+    lstm_hidden: 64
+    lstm_layers: 1
+    fc_hidden: 32
+    dropout: 0.3          # 恢复原来的0.3
+
+# 训练参数
+training:
+  batch_size: 32
+  epochs: 50  # 减少到50轮，避免过拟合
+  learning_rate: 5.0e-4
+  weight_decay: 1.0e-4  # 恢复原来的1e-4
+  # 类别权重 (处理类别不平衡) - 分别为PP和PE设置
+  # 设置为null表示使用自动计算的权重
+  class_weights_pp: null  # PP任务的类别权重（自动计算）
+  class_weights_pe: null  # PE任务的类别权重（自动计算）
+  # 动态类别权重 (根据数据分布自动计算)
+  dynamic_class_weights: false
+  class_weight_method: "inverse_freq"  # inverse_freq, effective_samples, sqrt_inverse
+  # 学习率调度器
+  scheduler:
+    type: "cosine_annealing"
+    T_max: 150
+  # 梯度裁剪
+  grad_clip: 1.0
+  # 数据增强
+  augmentation:
+    enabled: true
+    noise_std: 0.005      # 恢复原来的0.005
+  # 早停机制
+  early_stopping:
+    enabled: true
+    patience: 15          # 降低到15轮，避免过度训练（50轮太多了）
+    min_delta: 0.0005     # 最小改善量
+  # 检查点保存
+  checkpoints:
+    enabled: true
+    keep_last_n: 3        # 保留最近N个检查点
+  # 模型保存条件
+  save_conditions:
+    min_accuracy: 0.90
+    min_class0_accuracy: 0.99
+  # 随机种子
+  random_seed: 42
+  # 训练/验证数据划分（按数据集分别配置）
+  split:
+    "PP+淀粉":
+      train: [1, 2, 3, 4]
+      val: [5]
+    "PE+淀粉":
+      train: [1, 2, 3, 4]
+      val: [5]
+
+# 推理参数
+inference:
+  batch_size: 64
+  # 动态batch_size配置
+  auto_batch_size: true
+  max_memory_usage: 0.8  # 最大GPU显存使用率
+
+# 可视化参数
+visualization:
+  dpi: 300  # 顶级期刊要求300 DPI
+  figure_size: [8, 6]
+  colormap:
+    abundance: "hot"
+    classification: ["black", "blue", "red"]
+  font:
+    family: ["SimHei", "Microsoft YaHei", "DejaVu Sans"]
+
+# 可解释性分析参数
+interpretability:
+  n_samples: 200
+  n_repeats: 5
+  n_features_sample: 100
+  top_k_features: 15
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/raman_analysis.log"
+  console: true
+
+# 实验版本管理
+experiment:
+  name: "combined_v1"
+  description: "PP+淀粉和PE+淀粉联合训练，三端元解混"
+
+# ============================================================
+# 泛化实验配置
+# ============================================================
+generalization:
+  output_dir: "output/generalization"
+
+  # 泛化数据集（不同品牌淀粉）
+  datasets:
+    - name: "ganziyuan_wheat"
+      brand: "甘汁园小麦淀粉"
+      starch_type: "wheat"
+      base_path: "泛化/甘汁园小麦淀粉"
+      samples:
+        PP: "PP+淀粉/1 785mw 2s 2 2 40 40"
+        PE: "PE+淀粉/1 785mw 2s 2 2 40 40"
+      endmember: "淀粉纯谱/采集图谱.csv"
+
+    - name: "xinliang_wheat"
+      brand: "新良小麦淀粉"
+      starch_type: "wheat"
+      base_path: "泛化/新良小麦淀粉"
+      samples:
+        PP: "PP+淀粉/1 785mw 2s 2 2 40 40"
+        PE: "PE+淀粉/1 785mw 2s 2 2 40 40"
+      endmember: "淀粉纯谱/采集图谱.csv"
+
+    - name: "zhanyi_corn"
+      brand: "展艺玉米淀粉"
+      starch_type: "corn"
+      base_path: "泛化/展艺玉米淀粉"
+      samples:
+        PP: "PP+淀粉/1 785mw 2s 1 1 40 40"
+        PE: "PE+淀粉/1 785mw 2s 1 1 40 40"
+      endmember: "淀粉纯谱/采集图谱.csv"
+
+  # 端元配置策略（当前泛化实验使用 Combo 方案，强制统一端元，此配置仅供备用切换）
+  use_own_endmember: false  # true: 使用各品牌自己的淀粉端元; false: 使用原始玉米淀粉端元
+
+  # 共用端元（PP和PE塑料端元不变）
+  shared_endmembers:
+    pp:
+      folder: "PP纯谱"
+      file: "采集图谱.csv"
+    pe:
+      folder: "PE纯谱"
+      file: "采集图谱.csv"
+
+  # 模型加载路径
+  models_dir: "output/models"
+
+  # 评估指标
+  metrics: ["accuracy", "recall", "f1", "precision"]
